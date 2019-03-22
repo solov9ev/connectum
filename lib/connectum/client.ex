@@ -1,9 +1,16 @@
 defmodule Connectum.Client do
-  @moduledoc false
+  @moduledoc """
+  This module generates and sends requests.
+  """
 
-  def ping(), do: get("/ping")
+  def ping, do: get("/ping")
 
-  def order_information(id), do: get("/orders/#{id}")
+  def order_information(id, expand \\ []) when is_integer(id) do
+    case Connectum.order_expand_information(expand) do
+      {:ok, expand} -> get("/orders/#{id}?#{expand}")
+      error -> error
+    end
+  end
 
   # Private functions --------------------------------------------------------------------------------------------------
 
@@ -18,10 +25,10 @@ defmodule Connectum.Client do
     case response do
       {:ok, %HTTPoison.Response{status_code: status_code, body: body}}
       when status_code in [200, 201] ->
-        parse_response_body(body)
+        decode_body(body)
 
       {:ok, %HTTPoison.Response{status_code: status_code, body: body}} ->
-        {_, prepared_body} = parse_response_body(body)
+        {_, prepared_body} = decode_body(body)
         {:error, %{status_code: status_code, body: prepared_body}}
 
       {:error, error} ->
@@ -29,7 +36,7 @@ defmodule Connectum.Client do
     end
   end
 
-  defp parse_response_body(body) do
+  defp decode_body(body) do
     case Poison.decode(body) do
       {:ok, body} ->
         {:ok, body}
