@@ -57,7 +57,7 @@ defmodule Connectum.Client do
     ] ++ headers
   end
 
-  defp header_authorization() do
+  defp header_authorization do
     base64 =
       "#{Application.get_env(:connectum, :username)}:#{Application.get_env(:connectum, :password)}"
       |> Base.encode64()
@@ -65,15 +65,13 @@ defmodule Connectum.Client do
     {"Authorization", "Basic #{base64}"}
   end
 
-  defp header_content_type() do
-    {"Content-Type", "application/json"}
-  end
+  defp header_content_type, do: {"Content-Type", "application/json"}
 
   defp prepare_options(options) when is_list(options) do
     option_hackney_ssl() ++ options
   end
 
-  defp option_hackney_ssl() do
+  defp option_hackney_ssl do
     [
       hackney: [
         ssl_options: [
