@@ -1,9 +1,9 @@
 defmodule Connectum.Client do
   @moduledoc false
 
-  @content_type "application/json"
-
   def ping(), do: get("/ping")
+
+  def order_information(id), do: get("/orders/#{id}")
 
   # Private functions --------------------------------------------------------------------------------------------------
 
@@ -20,8 +20,9 @@ defmodule Connectum.Client do
       when status_code in [200, 201] ->
         parse_response_body(body)
 
-      {:ok, %HTTPoison.Response{status_code: status_code}} ->
-        {:error, status_code}
+      {:ok, %HTTPoison.Response{status_code: status_code, body: body}} ->
+        {_, prepared_body} = parse_response_body(body)
+        {:error, %{status_code: status_code, body: prepared_body}}
 
       {:error, error} ->
         {:error, error}
@@ -50,7 +51,10 @@ defmodule Connectum.Client do
   end
 
   defp prepare_headers(headers) when is_list(headers) do
-    header_authorization() ++ header_content_type() ++ headers
+    [
+      header_authorization(),
+      header_content_type()
+    ] ++ headers
   end
 
   defp header_authorization() do
@@ -58,11 +62,11 @@ defmodule Connectum.Client do
       "#{Application.get_env(:connectum, :username)}:#{Application.get_env(:connectum, :password)}"
       |> Base.encode64()
 
-    [{"Authorization", "Basic #{base64}"}]
+    {"Authorization", "Basic #{base64}"}
   end
 
   defp header_content_type() do
-    [{"Content-Type", @content_type}]
+    {"Content-Type", "application/json"}
   end
 
   defp prepare_options(options) when is_list(options) do
