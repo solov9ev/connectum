@@ -3,13 +3,33 @@ defmodule Connectum.Client do
   This module generates and sends requests.
   """
 
+  # Test request -------------------------------------------------------------------------------------------------------
+
   def ping, do: get("/ping")
 
-  def order_information(id, expand \\ []) when is_integer(id) do
-    case Connectum.order_expand_information(expand) do
-      {:ok, expand} -> get("/orders/#{id}?#{expand}")
-      error -> error
-    end
+  # Fetching data ------------------------------------------------------------------------------------------------------
+
+  def order_information(id), do: get("/orders/#{id}")
+  def order_information(id, params) when is_map(params) do
+    get("/orders/#{id}/?expand=#{Enum.join(params, ",")}")
+  end
+
+  def list_of_orders(params \\ []) do
+    get("/orders/?" <> URI.encode_query(params))
+  end
+
+  def list_of_operations(params \\ %{}) do
+    get("/operations/?" <> URI.encode_query(params))
+  end
+
+  # Working with orders ------------------------------------------------------------------------------------------------
+
+  def order_creation(body) do
+    post("/orders/create", Poison.encode!(body))
+  end
+
+  def authorize(body) do
+    post("/orders/authorize", Poison.encode!(body))
   end
 
   # Private functions --------------------------------------------------------------------------------------------------
@@ -19,6 +39,13 @@ defmodule Connectum.Client do
     |> build_url()
     |> HTTPoison.get(prepare_headers(headers), prepare_options(options))
     |> handle_request()
+  end
+
+  defp post(endpoint, body, headers \\ [], options \\ []) do
+  endpoint
+  |> build_url()
+  |> HTTPoison.post(body, prepare_headers(headers), prepare_options(options))
+  |> handle_request()
   end
 
   defp handle_request(response) do
