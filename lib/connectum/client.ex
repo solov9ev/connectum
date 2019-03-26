@@ -44,7 +44,9 @@ defmodule Connectum.Client do
   def reverse(id), do: put("/orders/#{id}/reverse")
 
   def charge(id), do: put("/orders/#{id}/charge")
-  def charge(id, body), do: put("/orders/#{id}/charge", Poison.encode!(body))
+  def charge(id, body) do
+    put("/orders/#{id}/charge", Poison.encode!(body))
+  end
 
   def refund(id), do: put("/orders/#{id}/refund")
   def refund(id, body) do
