@@ -10,6 +10,7 @@ defmodule Connectum.Client do
   # Fetching data ------------------------------------------------------------------------------------------------------
 
   def order_information(id), do: get("/orders/#{id}")
+
   def order_information(id, params) when is_map(params) do
     get("/orders/#{id}/?expand=#{Enum.join(params, ",")}")
   end
@@ -32,6 +33,29 @@ defmodule Connectum.Client do
     post("/orders/authorize", Poison.encode!(body))
   end
 
+  def repeating_payment(id, body) do
+    post("/orders/#{id}/rebill", Poison.encode!(body))
+  end
+
+  def original_credit_transaction(id, body) do
+    post("/orders/#{id}/credit", Poison.encode!(body))
+  end
+
+  def reverse(id), do: put("/orders/#{id}/reverse")
+
+  def charge(id), do: put("/orders/#{id}/charge")
+  def charge(id, body), do: put("/orders/#{id}/charge", Poison.encode!(body))
+
+  def refund(id), do: put("/orders/#{id}/refund")
+  def refund(id, body) do
+    put("/orders/#{id}/refund", Poison.encode!(body))
+  end
+
+  def cancel(id), do: put("/orders/#{id}/cancel")
+  def cancel(id, body) do
+    put("/orders/#{id}/cancel", Poison.encode!(body))
+  end
+
   # Private functions --------------------------------------------------------------------------------------------------
 
   defp get(endpoint, headers \\ [], options \\ []) do
@@ -42,10 +66,17 @@ defmodule Connectum.Client do
   end
 
   defp post(endpoint, body, headers \\ [], options \\ []) do
-  endpoint
-  |> build_url()
-  |> HTTPoison.post(body, prepare_headers(headers), prepare_options(options))
-  |> handle_request()
+    endpoint
+    |> build_url()
+    |> HTTPoison.post(body, prepare_headers(headers), prepare_options(options))
+    |> handle_request()
+  end
+
+  def put(endpoint, body \\ "", headers \\ [], options \\ []) do
+    endpoint
+    |> build_url()
+    |> HTTPoison.put(body, prepare_headers(headers), prepare_options(options))
+    |> handle_request()
   end
 
   defp handle_request(response) do
