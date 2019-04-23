@@ -44,16 +44,19 @@ defmodule Connectum.Client do
   def reverse(id), do: put("/orders/#{id}/reverse")
 
   def charge(id), do: put("/orders/#{id}/charge")
+
   def charge(id, body) do
     put("/orders/#{id}/charge", Poison.encode!(body))
   end
 
   def refund(id), do: put("/orders/#{id}/refund")
+
   def refund(id, body) do
     put("/orders/#{id}/refund", Poison.encode!(body))
   end
 
   def cancel(id), do: put("/orders/#{id}/cancel")
+
   def cancel(id, body) do
     put("/orders/#{id}/cancel", Poison.encode!(body))
   end
@@ -74,7 +77,7 @@ defmodule Connectum.Client do
     |> handle_request()
   end
 
-  def put(endpoint, body \\ "", headers \\ [], options \\ []) do
+  defp put(endpoint, body \\ "", headers \\ [], options \\ []) do
     endpoint
     |> build_url()
     |> HTTPoison.put(body, prepare_headers(headers), prepare_options(options))
