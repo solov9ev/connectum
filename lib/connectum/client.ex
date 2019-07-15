@@ -11,8 +11,8 @@ defmodule Connectum.Client do
 
   def order_information(id), do: get("/orders/#{id}")
 
-  def order_information(id, params) when is_map(params) do
-    get("/orders/#{id}/?expand=#{Enum.join(params, ",")}")
+  def order_information(id, params) when is_list(params) do
+    get("/orders/#{id}?expand=#{Enum.join(params, ", ")}")
   end
 
   def list_of_orders(params \\ []) do
